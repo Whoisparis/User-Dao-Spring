@@ -30,10 +30,8 @@ class UserControllerTest {
     @MockBean
     private UserService userService;
 
-    // CREATE USER TESTS
     @Test
     void createUser_WithValidData_ShouldReturnCreated() throws Exception {
-        // Arrange
         String userJson = """
             {
                 "name": "John Doe",
@@ -42,7 +40,6 @@ class UserControllerTest {
             }
             """;
 
-        // Act & Assert
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(userJson))
@@ -53,7 +50,6 @@ class UserControllerTest {
 
     @Test
     void createUser_WithInvalidData_ShouldReturnBadRequest() throws Exception {
-        // Arrange
         String invalidUserJson = """
             {
                 "name": "",
@@ -62,7 +58,6 @@ class UserControllerTest {
             }
             """;
 
-        // Act & Assert
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(invalidUserJson))
@@ -71,13 +66,9 @@ class UserControllerTest {
         verify(userService, never()).createUser(any());
     }
 
-    // GET USER BY ID TESTS
     @Test
     void getUserById_WhenUserExists_ShouldReturnUser() throws Exception {
-        // Arrange
-        // Mockito will handle the return type automatically
 
-        // Act & Assert
         mockMvc.perform(get("/api/users/1"))
                 .andExpect(status().isOk());
 
@@ -86,11 +77,9 @@ class UserControllerTest {
 
     @Test
     void getUserById_WhenUserNotExists_ShouldReturnNotFound() throws Exception {
-        // Arrange
         when(userService.getUserById(999L))
                 .thenThrow(new org.example.userservice.exception.UserNotFoundException(999L));
 
-        // Act & Assert
         mockMvc.perform(get("/api/users/999"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status", is(404)))
@@ -99,13 +88,9 @@ class UserControllerTest {
         verify(userService).getUserById(999L);
     }
 
-    // GET ALL USERS TESTS
     @Test
     void getAllUsers_ShouldReturnUsersList() throws Exception {
-        // Arrange
-        // Mockito will handle the return type automatically
 
-        // Act & Assert
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isOk());
 
@@ -114,10 +99,9 @@ class UserControllerTest {
 
     @Test
     void getAllUsers_WhenNoUsers_ShouldReturnEmptyList() throws Exception {
-        // Arrange
+
         when(userService.getAllUsers()).thenReturn(List.of());
 
-        // Act & Assert
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
@@ -125,10 +109,9 @@ class UserControllerTest {
         verify(userService).getAllUsers();
     }
 
-    // UPDATE USER TESTS
     @Test
     void updateUser_WithValidData_ShouldReturnUpdatedUser() throws Exception {
-        // Arrange
+
         String updateJson = """
             {
                 "name": "John Updated",
@@ -137,7 +120,6 @@ class UserControllerTest {
             }
             """;
 
-        // Act & Assert
         mockMvc.perform(put("/api/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateJson))
@@ -148,7 +130,7 @@ class UserControllerTest {
 
     @Test
     void updateUser_WhenUserNotExists_ShouldReturnNotFound() throws Exception {
-        // Arrange
+
         String updateJson = """
             {
                 "name": "John Updated",
@@ -160,7 +142,6 @@ class UserControllerTest {
         when(userService.updateUser(eq(999L), any()))
                 .thenThrow(new org.example.userservice.exception.UserNotFoundException(999L));
 
-        // Act & Assert
         mockMvc.perform(put("/api/users/999")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateJson))
@@ -171,7 +152,7 @@ class UserControllerTest {
 
     @Test
     void updateUser_WithExistingEmail_ShouldReturnConflict() throws Exception {
-        // Arrange
+
         String updateJson = """
             {
                 "name": "John Updated",
@@ -183,7 +164,6 @@ class UserControllerTest {
         when(userService.updateUser(eq(1L), any()))
                 .thenThrow(new org.example.userservice.exception.EmailAlreadyExistsException("existing@example.com"));
 
-        // Act & Assert
         mockMvc.perform(put("/api/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateJson))
@@ -192,13 +172,11 @@ class UserControllerTest {
         verify(userService).updateUser(eq(1L), any());
     }
 
-    // DELETE USER TESTS
     @Test
     void deleteUser_WhenUserExists_ShouldReturnNoContent() throws Exception {
-        // Arrange
+
         doNothing().when(userService).deleteUser(1L);
 
-        // Act & Assert
         mockMvc.perform(delete("/api/users/1"))
                 .andExpect(status().isNoContent());
 
@@ -207,24 +185,19 @@ class UserControllerTest {
 
     @Test
     void deleteUser_WhenUserNotExists_ShouldReturnNotFound() throws Exception {
-        // Arrange
+
         doThrow(new org.example.userservice.exception.UserNotFoundException(999L))
                 .when(userService).deleteUser(999L);
 
-        // Act & Assert
         mockMvc.perform(delete("/api/users/999"))
                 .andExpect(status().isNotFound());
 
         verify(userService).deleteUser(999L);
     }
 
-    // GET USER BY EMAIL TESTS
     @Test
     void getUserByEmail_WhenUserExists_ShouldReturnUser() throws Exception {
-        // Arrange
-        // Mockito will handle the return type automatically
 
-        // Act & Assert
         mockMvc.perform(get("/api/users/email/john@example.com"))
                 .andExpect(status().isOk());
 
@@ -233,11 +206,10 @@ class UserControllerTest {
 
     @Test
     void getUserByEmail_WhenUserNotExists_ShouldReturnNotFound() throws Exception {
-        // Arrange
+
         when(userService.getUserByEmail("nonexistent@example.com"))
                 .thenThrow(new org.example.userservice.exception.UserNotFoundException("User not found with email: nonexistent@example.com"));
 
-        // Act & Assert
         mockMvc.perform(get("/api/users/email/nonexistent@example.com"))
                 .andExpect(status().isNotFound());
 
@@ -246,7 +218,6 @@ class UserControllerTest {
 
     @Test
     void createUser_WithExistingEmail_ShouldReturnConflict() throws Exception {
-        // Arrange
         String userJson = """
             {
                 "name": "John Doe",
@@ -258,7 +229,6 @@ class UserControllerTest {
         when(userService.createUser(any()))
                 .thenThrow(new org.example.userservice.exception.EmailAlreadyExistsException("existing@example.com"));
 
-        // Act & Assert
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(userJson))

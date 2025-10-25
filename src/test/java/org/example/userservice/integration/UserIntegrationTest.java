@@ -36,7 +36,6 @@ class UserIntegrationTest {
 
     @Test
     void createAndRetrieveUser_ShouldWork() throws Exception {
-        // Create user
         String userJson = """
             {
                 "name": "Integration Test User",
@@ -54,17 +53,14 @@ class UserIntegrationTest {
                 .andExpect(jsonPath("$.email", is("integration@test.com")))
                 .andExpect(jsonPath("$.age", is(25)));
 
-        // Verify user was saved
         assertEquals(1, userRepository.count());
     }
 
     @Test
     void createUserWithDuplicateEmail_ShouldReturnConflict() throws Exception {
-        // Create first user
         User user = new User("First User", "duplicate@test.com", 30);
         userRepository.save(user);
 
-        // Try to create second user with same email
         String userJson = """
             {
                 "name": "Second User",
